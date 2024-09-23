@@ -62,15 +62,20 @@ update route msg model =
     case msg of
         Shared.Msg.SignIn { token } ->
             ( { model | token = Just token }
-            , Effect.pushRoute
-                { path = Route.Path.Home_
-                , query = Dict.empty
-                , hash = Nothing
-                }
+            , Effect.batch
+                [ Effect.pushRoute
+                    { path = Route.Path.Home_
+                    , query = Dict.empty
+                    , hash = Nothing
+                    }
+                , Effect.saveUser token
+                ]
             )
 
         Shared.Msg.SignOut ->
-            ( { model | token = Nothing }, Effect.none )
+            ( { model | token = Nothing }
+            , Effect.clearUser
+            )
 
 
 
