@@ -1,6 +1,6 @@
 export const flags = ({ env }) => {
   return {
-    token: JSON.parse(window.localStorage.token || null),
+    token: JSON.parse(window.localStorage.user || null),
   };
 };
 

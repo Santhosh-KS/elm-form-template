@@ -225,7 +225,14 @@ toCmd options effect =
             sendToLocalStorage value
 
 
-signIn : { token : String } -> Effect msg
+signIn :
+    { email : String
+    , id : String
+    , name : String
+    , profileImageUrl : String
+    , token : String
+    }
+    -> Effect msg
 signIn options =
     SendSharedMsg (Shared.Msg.SignIn options)
 
@@ -235,14 +242,28 @@ signOut =
     SendSharedMsg Shared.Msg.SignOut
 
 
-saveUser : String -> Effect msg
-saveUser token =
+saveUser :
+    { email : String
+    , id : String
+    , name : String
+    , profileImageUrl : String
+    , token : String
+    }
+    -> Effect msg
+saveUser user =
     SendToLocalStorage
-        { key = "token"
-        , value = Json.Encode.string token
+        { key = "user"
+        , value =
+            Json.Encode.object
+                [ ( "token", Json.Encode.string user.token )
+                , ( "id", Json.Encode.string user.token )
+                , ( "name", Json.Encode.string user.token )
+                , ( "profileImageUrl", Json.Encode.string user.token )
+                , ( "email", Json.Encode.string user.token )
+                ]
         }
 
 
 clearUser : Effect msg
 clearUser =
-    SendToLocalStorage { key = "token", value = Json.Encode.null }
+    SendToLocalStorage { key = "user", value = Json.Encode.null }

@@ -1,5 +1,6 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
+import Api.Me
 import Api.SignIn
 import Effect exposing (Effect)
 import Html exposing (Html)
@@ -49,6 +50,7 @@ type Msg
     = UserUpdatedInput Field String
     | UserSubmittedForm
     | SiginInApiResponded (Result (List Api.SignIn.Error) Api.SignIn.Data)
+    | MeApiResponded String (Result Http.Error Api.Me.User)
 
 
 type Field
@@ -80,7 +82,11 @@ update msg model =
 
         SiginInApiResponded (Ok { token }) ->
             ( { model | isSubmittingForm = False }
-            , Effect.signIn { token = token }
+            , Api.Me.get
+                { token = token
+                , onResponse = MeApiResponded token
+                }
+              -- , Effect.signIn { token = token }
             )
 
         SiginInApiResponded (Err errors) ->
@@ -91,8 +97,39 @@ update msg model =
             , Effect.none
             )
 
+        MeApiResponded token (Ok user) ->
+            ( { model | isSubmittingForm = False }
+            , Effect.signIn
+                { id = user.id
+                , name = user.name
+                , profileImageUrl = user.profileImageUrl
+                , email = user.email
+                , token = token
+                }
+            )
+
+        MeApiResponded _ (Err httpError) ->
+            let
+                error : Api.SignIn.Error
+                error =
+                    { field = Nothing
+                    , message = "User could not be found"
+                    }
+            in
+            ( { model | isSubmittingForm = False, errors = [ error ] }, Effect.signOut )
 
 
+
+{- let
+
+       error : Api.SignIn.Error
+       error =
+           {
+           field = Nothing
+           , message = "User couldn't be found"
+       }
+   in
+-}
 -- SUBSCRIPTIONS
 
 
